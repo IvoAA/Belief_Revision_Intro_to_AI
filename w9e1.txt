@@ -1,0 +1,5 @@
+A ~p >> q
+A q >> p
+A p >> r & s
+A (p | q) & (p | ~q)
+A p & (p >> r & s)
