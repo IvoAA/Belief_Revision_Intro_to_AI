@@ -64,6 +64,21 @@ class MyTestCase(unittest.TestCase):
         collection = Collection.from_str(test_str)
         self.assertEqual(str(collection), test_str)
 
+    def test_negation_collection(self):
+        test_str = "~(a | b)"
+
+        collection = Collection.from_str(test_str)
+        self.assertTrue(collection.negated)
+        self.assertEqual(test_str, str(collection))
+
+        test_str = "(a & ~(b | c))"
+
+        collection = Collection.from_str(test_str)
+        self.assertFalse(collection.negated)
+        self.assertTrue(collection.variables[1].negated)
+        self.assertEqual(test_str, str(collection))
+
+
     def test_double_nested_collection(self):
         test_str = "((a & b) | (c & d))"
 
@@ -74,6 +89,59 @@ class MyTestCase(unittest.TestCase):
 
         collection = Collection.from_str(test_str)
         self.assertEqual(str(collection), test_str)
+
+    def test_negation_variable(self):
+
+        a = Variable.from_str("a")
+        not_a = Variable.from_str("~a")
+
+        self.assertFalse(a.negated)
+        a.perform_negation()
+        self.assertTrue(a.negated)
+
+        self.assertTrue(not_a.negated)
+        not_a.perform_negation()
+        self.assertFalse(not_a.negated)
+
+    def test_negation_parsing(self):
+        test_str = "~(~a & ~b)"
+        negated_test_str = "(a | b)"
+
+        collection = Collection.from_str(test_str)
+        self.assertEqual(negated_test_str, str(collection.resolve_negation()))
+        print()
+
+    def test_negation_conversion_of_collection(self):
+        collection_str = "(a | b)"
+        negated_collection_str = "~(~a & ~b)"
+
+        collection = Collection.from_str(collection_str)
+        self.assertFalse(collection.negated)
+
+        new_collection = collection.perform_negation()
+        self.assertEqual(negated_collection_str, str(new_collection))
+
+        self.assertEqual(collection_str, str(new_collection.resolve_negation()))
+
+        collection_str = "~(a | ~b)"
+        negated_collection_str = "(~a & b)"
+        collection = Collection.from_str(collection_str)
+        new_collection = collection.resolve_negation()
+
+        self.assertEqual(negated_collection_str, str(new_collection))
+
+        self.assertEqual(collection_str, str(new_collection.perform_negation()))
+
+        collection_str = "~(a | (~b & ~c))"
+        negated_collection_str = "(~a & (b | c))"
+        collection = Collection.from_str(collection_str)
+        self.assertTrue(collection.negated)
+        new_collection = collection.resolve_negation()
+        self.assertFalse(new_collection.negated)
+        self.assertEqual(negated_collection_str, str(new_collection))
+
+
+        print()
 
 if __name__ == '__main__':
     unittest.main()
