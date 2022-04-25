@@ -27,7 +27,7 @@ class BeliefBase:
 
         clauses = self.sentence_to_clauses(sentence)
         for clause in clauses:
-            # TODO derive sentence, instead of checking if it's litterally there
+            # TODO derive sentence, instead of checking if it's literally there
             if clause not in self.knowledge_base:
                 return False
 
