@@ -1,11 +1,8 @@
 import math
-
 import copy
 
 from sympy import to_cnf
 from itertools import combinations
-
-
 from clause import Clause
 
 
