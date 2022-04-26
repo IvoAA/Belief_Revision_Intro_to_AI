@@ -1,9 +1,10 @@
-from Belief_Revision_Intro_to_AI.BeliefBase import BeliefBase
+from BeliefBase import BeliefBase
 
 
 def print_actions():
     print('\n\nPlease input the intended action:')
-    print('\tA: Add sentence to knowledge base')
+    print('\tA: Add a sentence to knowledge base')
+    print('\tC: Contract a sentence to knowledge base')
     print('\tE: Check if sentence can be deduced from knowledge base')
     print('\tB: Batch, read a file with several actions')
     print('\tKB: show current knowledge base')
@@ -67,7 +68,7 @@ def init():
         elif action == 'B':
             batch_actions(belief_base)
             continue
-        elif action not in ['A', 'E']:
+        elif action not in ['A', 'E', 'C']:
             print('Please input one of the possible options.')
             continue
 
@@ -78,6 +79,9 @@ def init():
             belief_base.tell(sentence)
         elif action == 'E':
             print(belief_base.check_entailment(sentence))
+        elif action == 'C':
+            belief_base.contraction(sentence)
+            belief_base.con
 
     # add to knowledge base
     return belief_base.get_knowledge_base()

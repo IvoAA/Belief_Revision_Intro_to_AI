@@ -1,28 +1,75 @@
 import math
 
+import copy
+
 from sympy import to_cnf
+from itertools import combinations
+
+
+from clause import Clause
 
 
 class BeliefBase:
     def __init__(self):
-        self.knowledge_base = []
+        self.__knowledge_base = []
+        self.nr_clause = 0
 
     def tell(self, sentence):
         clauses = self.sentence_to_clauses(sentence)
 
         # TODO check if any clause contradicts belief base before adding
         for clause in clauses:
-            self.addition(clause)
+            self.expansion(clause)
 
-    def addition(self, clause):
-        if clause not in self.knowledge_base:
-            self.knowledge_base.append(clause)
+    def expansion(self, clause):
+        if clause not in self.__knowledge_base:
+            self.__knowledge_base.append(Clause(clause, self.clause_priority()))
+
+    def clause_priority(self):
+        priority = self.nr_clause
+        self.nr_clause += 1
+        return priority
 
     def revision(self, sentence):
         pass
 
+    def _contradiction_by_clause(self, kb, nr_clauses, clause):
+        comb = combinations(kb, nr_clauses)
+        contradicting_comb = []
+        for c in comb:
+            dummy_kb = copy.deepcopy(self.__knowledge_base)
+            dummy_kb.remove(c)
+            if self.check_entailment(dummy_kb, clause):
+                contradicting_comb.append(c)
+        return contradicting_comb
+
+    def _combination_lowest_priority(self, combs):
+        candidate = combs[0]
+        for com in combs:
+            if sum(c.priority for c in com) > sum(c.priority for c in candidate):
+                candidate = com
+        return candidate
+
+    def _clause_contraction(self, c):
+        contradicting_comb = None
+        if not self.check_entailment(c):
+            for index in range(len(self.__knowledge_base)):
+                contradicting_comb = self._contradiction_by_clause(self.__knowledge_base, index + 1, c)
+                if len(contradicting_comb) > 0:
+                    break
+            if contradicting_comb is None:
+                raise "contradiction found in contraction, but no clause found which creates the contradiction"
+            remove_clauses = self._combination_lowest_priority(contradicting_comb)
+            for clause in remove_clauses:
+                self.__knowledge_base.remove(clause)
+
+        if c in self.__knowledge_base:
+            self.__knowledge_base.remove(c)
+
     def contraction(self, sentence):
-        pass
+        clauses = self.sentence_to_clauses(sentence)
+        for clause in clauses:
+            self._clause_contraction(clause)
 
     @staticmethod
     def get_unit_clauses(kb):
@@ -94,11 +141,16 @@ class BeliefBase:
         # negate sentence
         clauses = self.sentence_to_clauses(f"~({sentence})")
 
-        new_kb = clauses + self.knowledge_base
+        new_kb = clauses + self.get_knowledge_base()
         return not self.DPLL(new_kb)
 
     def get_knowledge_base(self):
-        return self.knowledge_base
+        order_kb = self.__knowledge_base
+        order_kb.sort(key=lambda x: x.priority)
+        output = []
+        for k in order_kb:
+            output.append(k.value)
+        return output
 
     @staticmethod
     def sentence_to_clauses(sentence):
