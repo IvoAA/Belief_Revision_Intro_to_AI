@@ -36,7 +36,7 @@ def batch_actions(belief_base):
     print('Please input the filename:')
     filename = input()
 
-    with open(f"{filename}.txt") as f:
+    with open(f"Batch/{filename}.txt") as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines):
@@ -67,6 +67,9 @@ def init():
         elif action == 'B':
             batch_actions(belief_base)
             continue
+        elif action not in ['A', 'E']:
+            print('Please input one of the possible options.')
+            continue
 
         print('Please input sentence:')
         sentence = input().strip()
@@ -75,8 +78,7 @@ def init():
             belief_base.tell(sentence)
         elif action == 'E':
             print(belief_base.check_entailment(sentence))
-        else:
-            print('Please input one of the possible options.')
+
     # add to knowledge base
     return belief_base.get_knowledge_base()
 
