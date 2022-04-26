@@ -81,7 +81,6 @@ def init():
             print(belief_base.check_entailment(sentence))
         elif action == 'C':
             belief_base.contraction(sentence)
-            belief_base.con
 
     # add to knowledge base
     return belief_base.get_knowledge_base()

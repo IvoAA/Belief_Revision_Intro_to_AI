@@ -33,13 +33,14 @@ class BeliefBase:
     def revision(self, sentence):
         pass
 
-    def _contradiction_by_clause(self, kb, nr_clauses, clause):
+    def _contradiction_by_clauses(self, kb, nr_clauses, clause):
         comb = combinations(kb, nr_clauses)
         contradicting_comb = []
         for c in comb:
-            dummy_kb = copy.deepcopy(self.__knowledge_base)
-            dummy_kb.remove(c)
-            if self.check_entailment(dummy_kb, clause):
+            kb_stub = copy.deepcopy(self.__knowledge_base)
+            for cl in c:
+                kb_stub.remove(cl)
+            if not self.check_entailment(clause, kb_stub):
                 contradicting_comb.append(c)
         return contradicting_comb
 
@@ -52,9 +53,9 @@ class BeliefBase:
 
     def _clause_contraction(self, c):
         contradicting_comb = None
-        if not self.check_entailment(c):
+        if self.check_entailment(c):
             for index in range(len(self.__knowledge_base)):
-                contradicting_comb = self._contradiction_by_clause(self.__knowledge_base, index + 1, c)
+                contradicting_comb = self._contradiction_by_clauses(self.__knowledge_base, index + 1, c)
                 if len(contradicting_comb) > 0:
                     break
             if contradicting_comb is None:
@@ -137,15 +138,22 @@ class BeliefBase:
             neg_term = str(to_cnf(f"~({term})"))
             return self.DPLL([neg_term] + kb)
 
-    def check_entailment(self, sentence):
+    def check_entailment(self, sentence, kb=None):
         # negate sentence
         clauses = self.sentence_to_clauses(f"~({sentence})")
 
-        new_kb = clauses + self.get_knowledge_base()
+        if kb is None:
+            new_kb = clauses + self.get_knowledge_base()
+        else:
+            new_kb = clauses + self.strip_kb(kb)
         return not self.DPLL(new_kb)
 
     def get_knowledge_base(self):
-        order_kb = self.__knowledge_base
+        return self.strip_kb(self.__knowledge_base)
+
+    @staticmethod
+    def strip_kb(kb):
+        order_kb = kb
         order_kb.sort(key=lambda x: x.priority)
         output = []
         for k in order_kb:
