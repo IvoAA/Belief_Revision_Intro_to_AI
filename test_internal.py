@@ -33,6 +33,39 @@ class MyTestCase(unittest.TestCase):
 
         self.assertTrue(DPLL(bb_true.get_knowledge_base()))
 
+    def test_check_entailment(self):
+        input_kb = "(p) & (p & q) & (p | q) & ((p >> q) & (q >> p))"
+        new_input = "p"
+
+        bb = BeliefBase()
+        bb.tell(input_kb)
+        self.assertTrue(bb.check_entailment(new_input))
+
+        input_kb = "a & b & c"
+        test_inputs = [
+            ("a", True),
+            ("~a", False),
+            ("d", False),
+            ("~d", False)
+        ]
+
+        bb = BeliefBase()
+        bb.tell(input_kb)
+        for sentence, expected_result in test_inputs:
+            self.assertEqual(bb.check_entailment(sentence), expected_result)
+
+    def test_contraction(self):
+        input_kb = "(p) & (p & q) & (p | q) & ((p >> q) & (q >> p))"
+        bb = BeliefBase()
+        bb.tell(input_kb)
+
+        self.assertEqual(bb.nr_clause, 5)
+
+
+
+        bb.contraction("p")
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -34,14 +34,14 @@ class BeliefBase:
         pass
 
     def _contradiction_by_clauses(self, kb: List[Clause], nr_clauses: int, clause) -> List:
-        comb = combinations(kb, nr_clauses)
+        all_combinations = combinations(kb, nr_clauses)
         contradicting_comb = []
-        for c in comb:
+        for combination in all_combinations:
             kb_stub = copy.deepcopy(self.__knowledge_base)
-            for cl in c:
+            for cl in combination:
                 kb_stub.remove(cl)
             if not self.check_entailment(clause, kb_stub):
-                contradicting_comb.append(c)
+                contradicting_comb.append(combination)
         return contradicting_comb
 
     @staticmethod
