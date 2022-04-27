@@ -11,18 +11,18 @@ from utils import DPLL, get_unit_clauses, simplify, sentence_to_clauses
 
 class BeliefBase:
     def __init__(self):
-        self.__knowledge_base = []
+        self.__knowledge_base: List[Clause] = []
         self.nr_clause = 0
 
-    def tell(self, sentence):
+    def tell(self, sentence: str):
         clauses = sentence_to_clauses(sentence)
 
         # TODO check if any clause contradicts belief base before adding
         for clause in clauses:
             self.expansion(clause)
 
-    def expansion(self, clause):
-        if clause not in self.__knowledge_base:
+    def expansion(self, clause: str):
+        if clause not in self.strip_kb(self.__knowledge_base):
             self.__knowledge_base.append(Clause(clause, self.clause_priority()))
 
     def clause_priority(self):
@@ -30,8 +30,10 @@ class BeliefBase:
         self.nr_clause += 1
         return priority
 
-    def revision(self, sentence):
-        pass
+    def revision(self, sentence: str):
+        negated_sentence = f"~({sentence})"
+        self.contraction(negated_sentence)
+        self.expansion(sentence)
 
     def _contradiction_by_clauses(self, kb: List[Clause], nr_clauses: int, clause) -> List:
         all_combinations = combinations(kb, nr_clauses)
