@@ -32,6 +32,7 @@ def batch_actions(belief_base):
     print('Please ensure the file has the correct format:')
     print("\t- Line starts with the intended action:")
     print('\t\tA: Add sentence to knowledge base')
+    print('\t\tC: Contract sentence from knowledge base')
     print('\t\tE: Check if sentence can be deduced from knowledge base')
     print('\t- Action is followed by a space and then the logic sentence')
     print('Please input the filename:')
@@ -41,10 +42,14 @@ def batch_actions(belief_base):
         lines = f.readlines()
 
     for i, line in enumerate(lines):
+        sentence = line[1:].rstrip()
+
         if line.startswith('A'):
-            belief_base.tell(line[1:].rstrip())
+            belief_base.tell(sentence)
         elif line.startswith('E'):
-            belief_base.check_entailment(line[1:].rstrip())
+            belief_base.check_entailment(sentence)
+        elif line.startswith('C'):
+            belief_base.contraction(sentence)
         else:
             print(f"Error in line {i+1}:")
             print(line)
