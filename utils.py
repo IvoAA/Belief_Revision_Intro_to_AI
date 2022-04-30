@@ -2,6 +2,8 @@ import math
 from sympy import to_cnf
 from typing import List, Union
 from clause import Clause
+import sys
+sys.setrecursionlimit(10000)
 
 
 def DPLL(kb: List):
@@ -45,7 +47,7 @@ def get_unit_clauses(kb: List) -> List:
     return unit_clauses
 
 
-def simplify(kb: List, unit: str) -> Union[List, bool]: # TODO: Why return bool here?
+def simplify(kb: List, unit: str) -> Union[List, bool]:  # TODO: Why return bool here?
     neg_unit = str(to_cnf(f"~({unit})"))
     space_unit = f" {unit}"
 
@@ -71,6 +73,17 @@ def simplify(kb: List, unit: str) -> Union[List, bool]: # TODO: Why return bool 
     return new_kb
 
 
+def get_units_from_clauses(kb: List[Clause]):
+    all_units = []
+    for clauses in kb:
+        clause_copy = clauses.value.replace(" ", "")
+        units = clause_copy.split("|")
+        for unit in units:
+            all_units.append(unit)
+
+    return all_units
+
+
 def sentence_to_clauses(sentence: str) -> List[str]:
     try:
         cnf = to_cnf(sentence)
@@ -81,5 +94,5 @@ def sentence_to_clauses(sentence: str) -> List[str]:
 
     for i, clause in enumerate(clauses):
         clauses[i] = clause.replace('(', '').replace(')', '').strip()
-    #TODO: Replace with map function
+    # TODO: Replace with map function
     return clauses

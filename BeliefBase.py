@@ -1,12 +1,9 @@
-import math
 import copy
 from typing import List
-
-from sympy import to_cnf
 from itertools import combinations
 from clause import Clause
 
-from utils import DPLL, get_unit_clauses, simplify, sentence_to_clauses
+from utils import DPLL, sentence_to_clauses, get_units_from_clauses
 
 
 class BeliefBase:
@@ -93,4 +90,13 @@ class BeliefBase:
         order_kb = kb.copy()
         order_kb.sort(key=lambda x: x.priority)
         return list(map(lambda x: x.value, order_kb))
+
+    def obtain_truth(self):
+        truths = []
+        units = get_units_from_clauses(self.__knowledge_base)
+        for unit in units:
+            if self.check_entailment(unit):
+                truths.append(unit)
+        return truths
+
 

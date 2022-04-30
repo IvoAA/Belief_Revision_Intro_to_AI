@@ -8,6 +8,7 @@ def print_actions():
     print('\tE: Check if sentence can be deduced from knowledge base')
     print('\tB: Batch, read a file with several actions')
     print('\tKB: show current knowledge base')
+    print('\tT: show current truths')
     print('\tH: Help')
     print('\tQ: Quit')
 
@@ -18,6 +19,10 @@ def show_knowledge_base(belief_base):
 
     print('--------------')
 
+def show_knowledge_truth(belief_base):
+    print('Truths:')
+    print(belief_base.obtain_truth())
+    print('--------------')
 
 def print_help():
     print('Symbols:')
@@ -66,6 +71,9 @@ def init():
             break
         elif action == 'KB':
             show_knowledge_base(belief_base)
+            continue
+        elif action == 'T':
+            show_knowledge_truth(belief_base)
             continue
         elif action == 'H':
             print_help()
