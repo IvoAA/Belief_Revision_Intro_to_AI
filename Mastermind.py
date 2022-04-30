@@ -1,4 +1,7 @@
+from xmlrpc.client import boolean
 from BeliefBase import BeliefBase
+import boolean_translation
+import itertools
 import random
 
 from main import init
@@ -101,7 +104,9 @@ class Mastermind:
                 correct_color_wrong_position+=1
                 colors_in_board.pop(color)
 
-        return correct_color_and_position, correct_color_wrong_position
+        wrong_color_wrong_position = 4 - correct_color_and_position - correct_color_wrong_position #hardcoded 4 positions
+
+        return correct_color_and_position, correct_color_wrong_position,wrong_color_wrong_position
 
     #checks guesses against the mastermind board
     #guesses should be given in sentences such as 'r_1 & b_2 & o_3 & i_4' order is unimportant, for example 
@@ -111,10 +116,9 @@ class Mastermind:
     def check_guess(self,sentence:str):
         #convert the sentence into a dictionary representation of the board
         sentence_board = self.sentence_to_mastermind_board(sentence)
-        correct_color_and_position,correct_color_wrong_position = self.compare_boards(self.mastermind_board, sentence_board)
+        correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position = self.compare_boards(self.mastermind_board, sentence_board)
         #game is over if all four positions have been correctly guessed
-        game_over = (correct_color_and_position == 4)
-        return correct_color_and_position,correct_color_wrong_position, game_over
+        return correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position
 
     def __str__(self):
         str_build = '|| '
@@ -130,10 +134,13 @@ class Mastermind_AI:
         self.belief_base = self.mastermind.belief_base
         self.colors = self.mastermind.colors
         self.game_over = False
-        self.correct_color_and_position = []
-        self.correct_color_wrong_position = []
+        self.correct_color_and_position = 0
+        self.correct_color_wrong_position = 0
+        self.wrong_color_wrong_position = 0
+        self.guess = []
         self.guessed = []
         self.n_rounds = 10 #hardcoded maximum 10 rounds
+
 
     def __init__(self,n_rounds):
         self.__init__()
@@ -142,24 +149,29 @@ class Mastermind_AI:
     #taken from wikipedia Knuth five-guess algorithm as being best guess
     def best_first_guess(self):
         guess = "r_1 & r_2 & o_3 & o_4"
-        self.correct_color_and_position,self.correct_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
+        self.guess = guess.split(' & ')
         self.guessed.append(guess)
+        boolean_string_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+
     
     def random_first_guess(self):
         guess = ' & '.join(self.colors[random.randint(0,5)]+'_'+x for x in range(1,5))
-        self.correct_color_and_position,self.correct_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
+        self.guess = guess.split(' & ')
         self.guessed.append(guess)
+    boolean_string_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
 
-    def informed_guess(self):
-        pass
 
-    def update_belief_base(self):
-        # update belief base with completely correct information
-        #for pred in self.correct_color_and_position:
-        pass
 
-    def boolean_translation(conjecture, feedback):
-        pass
+
+
+
+        
+
+
+
+
 
 
 
