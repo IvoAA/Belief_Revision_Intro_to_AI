@@ -140,19 +140,21 @@ class Mastermind_AI:
         self.guess = []
         self.guessed = []
         self.n_rounds = 10 #hardcoded maximum 10 rounds
+        self.boolean_translation_guess = ''
 
 
     def __init__(self,n_rounds):
         self.__init__()
         self.n_rounds = n_rounds
 
-    #taken from wikipedia Knuth five-guess algorithm as being best guess
+    #taken from wikipedia Knuth five-guess algorithm as being best first guess
     def best_first_guess(self):
         guess = "r_1 & r_2 & o_3 & o_4"
         self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
         self.guess = guess.split(' & ')
         self.guessed.append(guess)
-        boolean_string_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+        self.belief_base.tell(self.boolean_translation_guess)
 
     
     def random_first_guess(self):
@@ -160,7 +162,12 @@ class Mastermind_AI:
         self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
         self.guess = guess.split(' & ')
         self.guessed.append(guess)
-    boolean_string_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+        
+
+    def informed_guess(self):
+        self.belief_base.tell(self.boolean_translation_guess)
+
 
 
 
@@ -176,9 +183,6 @@ class Mastermind_AI:
 
 
 
-
-
-class Interactive_Mastermind_AI(Mastermind_AI):
 
 
 

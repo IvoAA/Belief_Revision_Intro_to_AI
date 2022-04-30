@@ -40,8 +40,9 @@ def boolean_translation(guess,n_correct,n_color):
                     
                     po = phi_o(positions_of_colors, colors_chosen, positions_of_incorrect_guesses)
                     pr = phi_r(positions_of_incorrect_guesses, colors_guesses_wrong)
-                    
-                    inner_str_build.append('('+ po + ' & ' + pr + ')')
+
+                    append_string = '('+ po + ' & ' + pr + ')' if po != '' else '(' + pr + ')'
+                    inner_str_build.append(append_string)
                 
                 por = (' || ').join(inner_str_build)
             
@@ -55,6 +56,7 @@ def boolean_translation(guess,n_correct,n_color):
             
         #there are no correct colors - all other colors are wrong
         else:
+
             possible_combinations_correct = list(itertools.combinations(guess, n_correct))
             
             str_build = []
@@ -62,14 +64,15 @@ def boolean_translation(guess,n_correct,n_color):
     
                 fixed_positions = [x[-1] for x in possible_correct_combination]
                 pg = phi_g(possible_correct_combination)
-                
+
                 guesses_deemed_wrong = [x for x in guess if x not in possible_correct_combination]
                 colors_guesses_wrong = [x[0] for x in guesses_deemed_wrong]
                 positions_of_incorrect_guesses = [x for x in all_positions if x not in fixed_positions]
                 
                 pr = phi_r(positions_of_incorrect_guesses,colors_guesses_wrong)
-                
-                str_build.append('('+ pg + ' & ' + pr + ')')
+
+                append_string = '('+ pg + ' & ' + pr + ')' if pr!= '' else '('+ pg + ')'
+                str_build.append(append_string)
                 
             return (' || ').join(str_build)
                 
@@ -77,8 +80,10 @@ def boolean_translation(guess,n_correct,n_color):
             
     #there may some correct colors
     else:
+
         #there are some correct colors
         if n_color>0:
+
             possible_colors_correct = list(itertools.combinations(guess, n_color))
             
             str_build = []
@@ -90,9 +95,13 @@ def boolean_translation(guess,n_correct,n_color):
                 colors_guesses_wrong = [x[0] for x in guesses_deemed_wrong]
                 
                 po = phi_o(positions_of_colors, colors_chosen, all_positions)
+
                 pr = phi_r(all_positions, colors_guesses_wrong)
-                
-                str_build.append('('+ po + ' & ' + pr + ')')
+
+                if len(pr) == 0:
+                    str_build.append('('+ po + ')')
+                else:
+                    str_build.append('('+ po + ' & ' + pr + ')')
             
             return (' || ').join(str_build)
                 
@@ -101,6 +110,7 @@ def boolean_translation(guess,n_correct,n_color):
             
         #they're all wrong
         else:
+
             return phi_r(all_positions,all_colors_in_guess)
 
 
@@ -131,12 +141,17 @@ def phi_o(positions,colors_chosen, free_positions):
         other_positions.append([x for x in free_positions if x != position])
         
     zipped = list(zip(other_positions,colors_chosen))
+
     str_build= []
+
     for (position_list,color) in zipped:
-        mapped_list = [color + position for position in position_list]
-        str_build.append('('+(' || ').join(mapped_list)+')')
+        if len(position_list)>0:
+
+            mapped_list = [color+ '_' + position for position in position_list]
+            str_build.append('('+(' || ').join(mapped_list)+')')
         
-    return '('+(' & ').join(str_build)+')'
+    return_string = '('+(' & ').join(str_build)+')' if len(str_build)>0 else ''
+    return return_string
         
     
     
@@ -144,6 +159,14 @@ def phi_o(positions,colors_chosen, free_positions):
 def phi_r(positions, colors):
     final_list = [f'{a}_{b}' for a in colors for b in positions]
     final_list = list(map(lambda y: '~'+y,final_list))
+    return_string= "(" + (' & ').join(final_list) + ')' if len(final_list)>0 else ''
+    return return_string
     
-    return "(" + (' & ').join(final_list) + ')'
     
+
+    
+
+
+
+
+
