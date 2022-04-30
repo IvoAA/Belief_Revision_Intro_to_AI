@@ -44,11 +44,11 @@ def boolean_translation(guess,n_correct,n_color):
                     append_string = '('+ po + ' & ' + pr + ')' if po != '' else '(' + pr + ')'
                     inner_str_build.append(append_string)
                 
-                por = (' || ').join(inner_str_build)
+                por = (' | ').join(inner_str_build)
             
                 str_build.append('('+ pg + ' & ' + por + ')')
             
-            return (' || ').join(str_build)
+            return (' | ').join(str_build)
             
             
             
@@ -74,7 +74,7 @@ def boolean_translation(guess,n_correct,n_color):
                 append_string = '('+ pg + ' & ' + pr + ')' if pr!= '' else '('+ pg + ')'
                 str_build.append(append_string)
                 
-            return (' || ').join(str_build)
+            return (' | ').join(str_build)
                 
                 
             
@@ -103,7 +103,7 @@ def boolean_translation(guess,n_correct,n_color):
                 else:
                     str_build.append('('+ po + ' & ' + pr + ')')
             
-            return (' || ').join(str_build)
+            return (' | ').join(str_build)
                 
                 
                 
@@ -148,7 +148,7 @@ def phi_o(positions,colors_chosen, free_positions):
         if len(position_list)>0:
 
             mapped_list = [color+ '_' + position for position in position_list]
-            str_build.append('('+(' || ').join(mapped_list)+')')
+            str_build.append('('+(' | ').join(mapped_list)+')')
         
     return_string = '('+(' & ').join(str_build)+')' if len(str_build)>0 else ''
     return return_string

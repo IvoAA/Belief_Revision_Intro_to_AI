@@ -31,7 +31,7 @@ def DPLL(kb: List):
     if DPLL([term] + kb):
         return True
     else:
-        neg_term = str(to_cnf(f"~({term})"))
+        neg_term = str(to_cnf(f"~({term})",force=True))
         return DPLL([neg_term] + kb)
 
 
@@ -46,7 +46,7 @@ def get_unit_clauses(kb: List) -> List:
 
 
 def simplify(kb: List, unit: str) -> Union[List, bool]: # TODO: Why return bool here?
-    neg_unit = str(to_cnf(f"~({unit})"))
+    neg_unit = str(to_cnf(f"~({unit})",force = True))
     space_unit = f" {unit}"
 
     new_kb = []
@@ -73,7 +73,7 @@ def simplify(kb: List, unit: str) -> Union[List, bool]: # TODO: Why return bool 
 
 def sentence_to_clauses(sentence: str) -> List[str]:
     try:
-        cnf = to_cnf(sentence)
+        cnf = to_cnf(sentence, force=True)
         clauses = str(cnf).split('&')
 
     except SyntaxError:
