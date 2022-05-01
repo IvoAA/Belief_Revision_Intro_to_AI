@@ -154,7 +154,7 @@ class Mastermind_AI:
         self.guessed = []
         self.n_rounds = 10 #hardcoded maximum 10 rounds
         self.boolean_translation_guess = ''
-        self.best_first_guess_flag = True
+        self.best_first_guess_flag = False
         self.all_guesses = self.create_all_possible_guesses()
         self.truths = []
         self.falsities = []
@@ -186,19 +186,50 @@ class Mastermind_AI:
 
     
     def random_first_guess(self):
-        guess = ' & '.join(self.colors[random.randint(0,5)]+'_'+x for x in range(1,5))
+        guess = ' & '.join([self.colors[random.randint(0,4)]+'_'+str(x) for x in range(1,5)])
+        guess_l = guess.split(' & ')
         print('The guessed value is: '+ guess)
-        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
         print('number correct: '+str(self.correct_color_and_position))
         print('colors correct: '+ str(self.correct_color_wrong_position))
         print('totally wrong: '+ str(self.wrong_color_wrong_position))
-        self.truths.extend(self.belief_base.obtain_truth())
-        self.falsities.extend(self.belief_base.obtain_falsities())
-        print('truths found: '+ str(self.truths))
-        print('falsities found: '+ str(self.falsities))
         self.guess = guess
         self.guessed.append(guess)
-        self.boolean_translation_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
+        print('boolean translation:')
+        print(self.boolean_translation_guess)
+        print("unit clauses before telling:")
+        print(self.belief_base.obtain_units())
+        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        print("unit clauses after telling:")
+        print(self.belief_base.obtain_units())
+        unit_clauses = self.belief_base.obtain_units()
+        self.truths.extend([x for x in unit_clauses if '~' not in x])
+        self.falsities.extend([x for x in unit_clauses if '~' in x])
+        self.falsities = list(map(lambda y: y[1:], self.falsities))
+
+    def manual_guess(self):
+        guess = "g_1 & r_2 & y_3 & b_4"
+        guess_l = guess.split(' & ')
+        print('The guessed value is: '+ guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
+        print('number correct: '+str(self.correct_color_and_position))
+        print('colors correct: '+ str(self.correct_color_wrong_position))
+        print('totally wrong: '+ str(self.wrong_color_wrong_position))
+        self.guess = guess
+        self.guessed.append(guess)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
+        print('boolean translation:')
+        print(self.boolean_translation_guess)
+        print("unit clauses before telling:")
+        print(self.belief_base.obtain_units())
+        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        print("unit clauses after telling:")
+        print(self.belief_base.obtain_units())
+        unit_clauses = self.belief_base.obtain_units()
+        self.truths.extend([x for x in unit_clauses if '~' not in x])
+        self.falsities.extend([x for x in unit_clauses if '~' in x])
+        self.falsities = list(map(lambda y: y[1:], self.falsities))
         
 
     def informed_guess(self):
@@ -301,6 +332,7 @@ class Mastermind_AI:
 
         if self.best_first_guess_flag:
             self.best_first_guess()
+            #self.manual_guess()
         else:
             self.random_first_guess()
 
