@@ -6,6 +6,7 @@ from clause import Clause
 from utils import DPLL, sentence_to_clauses,get_units_from_clauses, get_units_from_clauses_mastermind
 
 
+
 class BeliefBase:
     def __init__(self):
         self.__knowledge_base: List[Clause] = []
@@ -91,9 +92,11 @@ class BeliefBase:
         order_kb.sort(key=lambda x: x.priority)
         return list(map(lambda x: x.value, order_kb))
 
+
     def obtain_units(self):
         units = get_units_from_clauses_mastermind(self.__knowledge_base)
         return units
+
 
     def obtain_truth(self):
         truths = []
@@ -114,3 +117,6 @@ class BeliefBase:
     #        if self.check_entailment('~'+unit):
     #            falsities.append(unit)
     #    return truths, falsities
+=======
+
+
