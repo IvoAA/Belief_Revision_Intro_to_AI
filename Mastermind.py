@@ -202,6 +202,7 @@ class Mastermind_AI:
                     self.guess = guess
                     self.guessed.append(guess)
                     self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
+                    self.belief_base.tell(self.boolean_translation_guess)
 
 
     def create_all_possible_guesses(self):
