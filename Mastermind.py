@@ -174,14 +174,15 @@ class Mastermind_AI:
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
         print('boolean translation:')
         print(self.boolean_translation_guess)
-        print('knowledge base before telling: ')
-        print(self.mastermind.belief_base.get_knowledge_base())
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
         self.belief_base.tell("("+self.boolean_translation_guess+")")
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
+        truths = self.belief_base.obtain_truth()
+        print(truths)
+        input()
         self.truths.extend([x for x in unit_clauses if '~' not in x])
         self.falsities.extend([x for x in unit_clauses if '~' in x])
         self.falsities = list(map(lambda y: y[1:], self.falsities))
@@ -235,7 +236,10 @@ class Mastermind_AI:
         while guess in self.guessed:
             guess_l = []
             for position in ['1','2','3','4']:
-                guess_l.append(random.choice(possible_guesses[position]))
+                if len(possible_guesses[position])>0:
+                    guess_l.append(random.choice(possible_guesses[position]))
+                else:
+                    guess_l.append('this shouldn\'t happen')
 
             guess = (' & ').join(guess_l)
 
@@ -247,14 +251,11 @@ class Mastermind_AI:
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
-        print('boolean translation:')
-        print(self.boolean_translation_guess)
-        sentences = self.boolean_translation_guess.split("|")
-        print(sentences)
+
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        for sentence in sentences:    
-            self.belief_base.tell("("+sentence+")")
+
+        self.belief_base.tell("("+self.boolean_translation_guess+")")
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()

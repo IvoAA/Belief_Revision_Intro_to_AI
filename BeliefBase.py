@@ -95,13 +95,22 @@ class BeliefBase:
         units = get_units_from_clauses_mastermind(self.__knowledge_base)
         return units
 
-    def obtain_truth_falsity(self):
+    def obtain_truth(self):
         truths = []
-        falsities = []
         units = get_units_from_clauses(self.__knowledge_base)
         for unit in units:
             if self.check_entailment(unit):
                 truths.append(unit)
-            if self.check_entailment('~'+unit):
-                falsities.append(unit)
-        return truths, falsities
+        return truths
+
+        
+    #def obtain_truth_falsity(self):
+    #   truths = []
+    #    falsities = []
+    #    units = get_units_from_clauses(self.__knowledge_base)
+    #    for unit in units:
+    #        if self.check_entailment(unit):
+    #            truths.append(unit)
+    #        if self.check_entailment('~'+unit):
+    #            falsities.append(unit)
+    #    return truths, falsities
