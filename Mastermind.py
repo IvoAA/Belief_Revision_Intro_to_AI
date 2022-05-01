@@ -3,6 +3,7 @@ from BeliefBase import BeliefBase
 import boolean_translation
 import itertools
 import random
+from utils import get_units_from_clauses
 
 #implementing game logic for 4 pegs, 6 colors, 10 turns (if applicable) mastermind
 #possible colors are red (r), orange (o), yellow (y), green (g), blue (b), indigo (i)
@@ -152,6 +153,8 @@ class Mastermind_AI:
         self.boolean_translation_guess = ''
         self.best_first_guess_flag = True
         self.all_guesses = self.create_all_possible_guesses()
+        self.truths = []
+        self.falsities = []
 
 
     #taken from wikipedia Knuth five-guess algorithm as being best first guess
@@ -166,9 +169,25 @@ class Mastermind_AI:
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
-        #print(self.boolean_translation_guess)
-        #print()
+
+        print(self.boolean_translation_guess)
+        print("knowledge base before telling:")
+        print(self.belief_base.get_knowledge_base())
+        print("unit clauses before telling:")
+        print(str(get_units_from_clauses(self.belief_base.__knowledge_base)))
         self.belief_base.tell(self.boolean_translation_guess)
+        print("knowledge base after telling:")
+        print(self.belief_base.get_knowledge_base())
+        print("unit clauses after telling:")
+        print(str(get_units_from_clauses(self.belief_base.__knowledge_base)))
+        print(self.belief_base.check_entailment('o_1'))
+
+        input()
+        #self.truths.extend(self.belief_base.obtain_truth())
+        #self.falsities.extend(self.belief_base.obtain_falsities())
+        #print('truths found: '+ str(self.truths))
+        #print('falsities found: '+ str(self.falsities))
+        #input()
 
     
     def random_first_guess(self):
@@ -178,13 +197,25 @@ class Mastermind_AI:
         print('number correct: '+str(self.correct_color_and_position))
         print('colors correct: '+ str(self.correct_color_wrong_position))
         print('totally wrong: '+ str(self.wrong_color_wrong_position))
+        self.truths.extend(self.belief_base.obtain_truth())
+        self.falsities.extend(self.belief_base.obtain_falsities())
+        print('truths found: '+ str(self.truths))
+        print('falsities found: '+ str(self.falsities))
+        input()
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
         
 
     def informed_guess(self):
+        print('making an informed guess')
         self.belief_base.revision(self.boolean_translation_guess)
+        self.truths.extend(self.belief_base.obtain_truth())
+        self.falsities.extend(self.belief_base.obtain_falsities())
+        print('truths found: '+ str(self.truths))
+        print('falsities found: '+ str(self.falsities))
+        input()
+
 
     def brute_force_guess(self):
         print('brute forcing guess')
@@ -230,7 +261,7 @@ class Mastermind_AI:
 
         turn = self.n_rounds -1
         while not(self.game_over) and turn > 0:
-            self.brute_force_guess()
+            self.informed_guess()
         if self.game_over:
             print('the computer successfully guessed the board')
         else:
