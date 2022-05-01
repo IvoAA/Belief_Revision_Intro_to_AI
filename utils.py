@@ -3,6 +3,7 @@ from sympy import to_cnf
 from typing import List, Union
 from clause import Clause
 import sys
+
 sys.setrecursionlimit(10000)
 
 
@@ -85,14 +86,48 @@ def get_units_from_clauses(kb: List[Clause]):
 
 
 def sentence_to_clauses(sentence: str) -> List[str]:
-    try:
-        cnf = to_cnf(sentence)
-        clauses = str(cnf).split('&')
+    small_sentences = split_sentence_by_first_OR(sentence)
+    clauses = ''
+    for unit_sentence in small_sentences:
+        try:
+            cnf = to_cnf(unit_sentence)
+            clauses = str(cnf).split('&')
 
-    except SyntaxError:
-        raise Exception('Formula provided has wrong format.')
+        except SyntaxError:
+            raise Exception('Formula provided has wrong format.')
 
-    for i, clause in enumerate(clauses):
-        clauses[i] = clause.replace('(', '').replace(')', '').strip()
-    # TODO: Replace with map function
+        for i, clause in enumerate(clauses):
+            clauses[i] = clause.replace('(', '').replace(')', '').strip()
+        # TODO: Replace with map function
     return clauses
+
+
+def split_sentence_by_first_OR(sentence: str) -> List[str]:
+    parenthesis = 0
+    splitters = []
+    sentences = []
+    for idx, c in enumerate(sentence):
+        if c == '(':
+            parenthesis += 1
+        if c == ')':
+            parenthesis -= 1
+        if c == '|' and parenthesis == 0:
+            splitters.append(idx)
+    # if no splitters then we convert sentence to a List
+    if len(splitters) == 0:
+        sentences.append(sentence)
+        return sentences
+    start_split = 0
+    for split in splitters:
+        sentences.append(sentence[start_split:split])
+        start_split = split + 1
+    return sentences
+
+
+def get_units_from_clauses_mastermind(kb: List[Clause]):
+    all_units = []
+    for clauses in kb:
+        if '|' not in clauses.value:
+            all_units.append(clauses)
+
+    return [x.value for x in all_units]

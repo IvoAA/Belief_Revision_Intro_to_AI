@@ -3,7 +3,7 @@ from typing import List
 from itertools import combinations
 from clause import Clause
 
-from utils import DPLL, sentence_to_clauses, get_units_from_clauses
+from utils import DPLL, sentence_to_clauses,get_units_from_clauses, get_units_from_clauses_mastermind
 
 
 class BeliefBase:
@@ -92,5 +92,16 @@ class BeliefBase:
         return list(map(lambda x: x.value, order_kb))
 
     def obtain_units(self):
-        units = get_units_from_clauses(self.__knowledge_base)
+        units = get_units_from_clauses_mastermind(self.__knowledge_base)
         return units
+
+    def obtain_truth_falsity(self):
+        truths = []
+        falsities = []
+        units = get_units_from_clauses(self.__knowledge_base)
+        for unit in units:
+            if self.check_entailment(unit):
+                truths.append(unit)
+            if self.check_entailment('~'+unit):
+                falsities.append(unit)
+        return truths, falsities

@@ -1,4 +1,5 @@
 from doctest import master
+from re import I
 from BeliefBase import BeliefBase
 import boolean_translation
 import itertools
@@ -71,16 +72,18 @@ class Mastermind:
             #there must be one color in each position
             all_colors_in_position = [color+'_'+position for color in self.colors]
             sentence = (' | ').join(all_colors_in_position)
+            sentence = "("+sentence+")"
             #print(sentence)
-            #print('\n')
             game_rule_belief_base.tell(sentence)
+            #print(game_rule_belief_base.obtain_units())
+            #print('\n')
 
             #there can only be one color in each position
             sentence = self.only_one_color(position)
             #print(sentence)
-            #print('\n')
             game_rule_belief_base.tell(sentence)
-
+            #print(game_rule_belief_base.obtain_units())
+            #print('\n')
 
         #print(game_rule_belief_base.get_knowledge_base())
         return game_rule_belief_base
@@ -116,7 +119,7 @@ class Mastermind:
 
         wrong_color_wrong_position = 4 - correct_color_and_position - correct_color_wrong_position #hardcoded 4 positions
 
-        return correct_color_and_position, correct_color_wrong_position,wrong_color_wrong_position
+        return correct_color_and_position, correct_color_wrong_position,wrong_color_wrong_position, correct_color_and_position== 4
 
     #checks guesses against the mastermind board
     #guesses should be given in sentences such as 'r_1 & b_2 & o_3 & i_4' order is unimportant, for example 
@@ -126,9 +129,9 @@ class Mastermind:
     def check_guess(self,sentence:str):
         #convert the sentence into a dictionary representation of the board
         sentence_board = self.sentence_to_mastermind_board(sentence)
-        correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position = self.compare_boards(self.mastermind_board, sentence_board)
+        correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position, game_over = self.compare_boards(self.mastermind_board, sentence_board)
         #game is over if all four positions have been correctly guessed
-        return correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position
+        return correct_color_and_position,correct_color_wrong_position, wrong_color_wrong_position, game_over
 
     def __str__(self):
         str_build = '| '
@@ -162,32 +165,26 @@ class Mastermind_AI:
         guess = "r_1 & r_2 & o_3 & o_4"
         guess_l = guess.split(' & ')
         print('The guessed value is: '+ guess)
-        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position = self.mastermind.check_guess(guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
         print('number correct: '+str(self.correct_color_and_position))
         print('colors correct: '+ str(self.correct_color_wrong_position))
         print('totally wrong: '+ str(self.wrong_color_wrong_position))
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
-
+        print('boolean translation:')
         print(self.boolean_translation_guess)
-        print("knowledge base before telling:")
-        print(self.belief_base.get_knowledge_base())
+        print('knowledge base before telling: ')
+        print(self.mastermind.belief_base.get_knowledge_base())
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        self.belief_base.tell(self.boolean_translation_guess)
-        print("knowledge base after telling:")
-        print(self.belief_base.get_knowledge_base())
+        self.belief_base.tell("("+self.boolean_translation_guess+")")
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
-        print(self.belief_base.check_entailment('o_1'))
-
-        input()
-        #self.truths.extend(self.belief_base.obtain_truth())
-        #self.falsities.extend(self.belief_base.obtain_falsities())
-        #print('truths found: '+ str(self.truths))
-        #print('falsities found: '+ str(self.falsities))
-        #input()
+        unit_clauses = self.belief_base.obtain_units()
+        self.truths.extend([x for x in unit_clauses if '~' not in x])
+        self.falsities.extend([x for x in unit_clauses if '~' in x])
+        self.falsities = list(map(lambda y: y[1:], self.falsities))
 
     
     def random_first_guess(self):
@@ -201,22 +198,71 @@ class Mastermind_AI:
         self.falsities.extend(self.belief_base.obtain_falsities())
         print('truths found: '+ str(self.truths))
         print('falsities found: '+ str(self.falsities))
-        input()
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess,self.correct_color_and_position, self.correct_color_wrong_position)
         
 
     def informed_guess(self):
+        positions = {}
+
+        positions['1'] = [x+'_1' for x in self.colors]
+        positions['2'] = [x+'_2' for x in self.colors]
+        positions['3'] = [x+'_3' for x in self.colors]
+        positions['4'] = [x+'_4' for x in self.colors]
+
+        possible_guesses = {}
+        possible_guesses['1'] = []
+        possible_guesses['2'] = []
+        possible_guesses['3'] = []
+        possible_guesses['4'] = []
+
+        for truth in self.truths:
+            possible_guesses[truth[-1]].append(truth)
+
         print('making an informed guess')
-        self.belief_base.revision(self.boolean_translation_guess)
-        self.truths.extend(self.belief_base.obtain_truth())
-        self.falsities.extend(self.belief_base.obtain_falsities())
-        print('truths found: '+ str(self.truths))
-        print('falsities found: '+ str(self.falsities))
-        input()
+        
+        correct_positions = [x[-1] for x in self.truths]
+        incorrect_positions = [x for x in ['1','2','3','4'] if x not in correct_positions]
 
+        
+        for x in incorrect_positions:
+            all_guesses = positions[x]
+            possible_guesses[x].extend([y for y in all_guesses if y not in self.falsities])
 
+        guess = self.guess
+
+        while guess in self.guessed:
+            guess_l = []
+            for position in ['1','2','3','4']:
+                guess_l.append(random.choice(possible_guesses[position]))
+
+            guess = (' & ').join(guess_l)
+
+        print('The guessed value is: '+ guess)
+        self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
+        print('number correct: '+str(self.correct_color_and_position))
+        print('colors correct: '+ str(self.correct_color_wrong_position))
+        print('totally wrong: '+ str(self.wrong_color_wrong_position))
+        self.guess = guess
+        self.guessed.append(guess)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
+        print('boolean translation:')
+        print(self.boolean_translation_guess)
+        sentences = self.boolean_translation_guess.split("|")
+        print(sentences)
+        print("unit clauses before telling:")
+        print(self.belief_base.obtain_units())
+        for sentence in sentences:    
+            self.belief_base.tell("("+sentence+")")
+        print("unit clauses after telling:")
+        print(self.belief_base.obtain_units())
+        unit_clauses = self.belief_base.obtain_units()
+        self.truths.extend([x for x in unit_clauses if '~' not in x])
+        self.falsities.extend([x for x in unit_clauses if '~' in x])
+        self.falsities = list(map(lambda y: y[1:], self.falsities))
+
+            
     def brute_force_guess(self):
         print('brute forcing guess')
         self.belief_base.revision(self.boolean_translation_guess)
