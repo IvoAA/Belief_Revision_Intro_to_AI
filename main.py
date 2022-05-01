@@ -1,4 +1,5 @@
 from BeliefBase import BeliefBase
+from Mastermind import Mastermind_AI
 
 
 def print_actions():
@@ -9,6 +10,7 @@ def print_actions():
     print('\tB: Batch, read a file with several actions')
     print('\tKB: show current knowledge base')
     print('\tT: show current truths')
+    print('\tM: Play Mastermind')
     print('\tH: Help')
     print('\tQ: Quit')
 
@@ -81,7 +83,22 @@ def init():
         elif action == 'B':
             batch_actions(belief_base)
             continue
-        elif action not in ['A', 'E', 'C']:
+        elif action == 'M':
+            print('do you want to create your own board [y] or have one auto-generated? [n]')
+            action = input()
+            while action not in ['y','n']:
+                print('please choose y/n')
+                action = input().upper()
+            if action == 'y':
+                print('please input your board as a stirng of the form (r_1 & o_2 & y_3 & g_4)')
+                print('possible colors are [r,o,y,g,b,i] \n')
+                action = input()
+                mastermind = Mastermind_AI(action)
+                mastermind.play()
+            elif action == 'n':
+                mastermind = Mastermind_AI('')
+                mastermind.play()
+        elif action not in ['A', 'E', 'C','M']:
             print('Please input one of the possible options.')
             continue
 

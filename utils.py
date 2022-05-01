@@ -122,3 +122,12 @@ def split_sentence_by_first_OR(sentence: str) -> List[str]:
         sentences.append(sentence[start_split:split])
         start_split = split + 1
     return sentences
+
+
+def get_units_from_clauses_mastermind(kb: List[Clause]):
+    all_units = []
+    for clauses in kb:
+        if '|' not in clauses.value:
+            all_units.append(clauses)
+
+    return [x.value for x in all_units]
