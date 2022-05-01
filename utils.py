@@ -24,18 +24,18 @@ def DPLL(kb: List):
     shortest_clause_terms = math.inf
 
     for clause in kb:
-        terms = clause.count('|')
+        terms = clause.count('|') + 1
         if terms < shortest_clause_terms:
             shortest_clause = clause
             shortest_clause_terms = terms
 
     term = shortest_clause.split(' |')[0]
+    neg_term = str(to_cnf(f"~({term})"))
 
-    if DPLL([term] + kb):
+    if DPLL([neg_term] + kb):
         return True
     else:
-        neg_term = str(to_cnf(f"~({term})"))
-        return DPLL([neg_term] + kb)
+        return DPLL([term] + kb)
 
 
 def get_unit_clauses(kb: List) -> List:
