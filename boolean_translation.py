@@ -91,7 +91,7 @@ def boolean_translation(guess,n_correct,n_color):
                 colors_chosen = [x[0] for x in possible_color_correct_combination]
                 positions_of_colors = [x[-1] for x in possible_color_correct_combination]
                 
-                guesses_deemed_wrong = [x for x in guess if x not in possible_color_correct_combination]
+                guesses_deemed_wrong = [x for x in guess if x not in possible_color_correct_combination and x[0] not in colors_chosen]
                 colors_guesses_wrong = [x[0] for x in guesses_deemed_wrong]
                 
                 po = phi_o(positions_of_colors, colors_chosen, all_positions)
