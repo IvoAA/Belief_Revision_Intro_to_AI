@@ -117,6 +117,6 @@ class BeliefBase:
     #        if self.check_entailment('~'+unit):
     #            falsities.append(unit)
     #    return truths, falsities
-=======
+
 
 
