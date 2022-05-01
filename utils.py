@@ -76,10 +76,8 @@ def simplify(kb: List, unit: str) -> Union[List, bool]:  # TODO: Why return bool
 def get_units_from_clauses(kb: List[Clause]):
     all_units = []
     for clauses in kb:
-        clause_copy = clauses.value.replace(" ", "")
-        units = clause_copy.split("|")
-        for unit in units:
-            all_units.append(unit)
+        if '|' not in clauses:
+            all_units.append(clauses)
 
     return all_units
 
