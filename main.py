@@ -88,7 +88,6 @@ def init():
             action = input()
             while action not in ['y','n']:
                 print('please choose y/n')
-                action = input().upper()
             if action == 'y':
                 print('please input your board as a stirng of the form (r_1 & o_2 & y_3 & g_4)')
                 print('possible colors are [r,o,y,g,b,i] \n')
