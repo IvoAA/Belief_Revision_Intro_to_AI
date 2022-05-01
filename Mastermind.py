@@ -180,9 +180,6 @@ class Mastermind_AI:
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
-        truths = self.belief_base.obtain_truth()
-        print(truths)
-        input()
         self.truths.extend([x for x in unit_clauses if '~' not in x])
         self.falsities.extend([x for x in unit_clauses if '~' in x])
         self.falsities = list(map(lambda y: y[1:], self.falsities))
@@ -251,7 +248,8 @@ class Mastermind_AI:
         self.guess = guess
         self.guessed.append(guess)
         self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
-
+        print('boolean translation: ')
+        print(self.boolean_translation_guess)
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
 
@@ -308,6 +306,8 @@ class Mastermind_AI:
 
         turn = self.n_rounds -1
         while not(self.game_over) and turn > 0:
+            print('new turn, hit enter')
+            input()
             self.informed_guess()
         if self.game_over:
             print('the computer successfully guessed the board')
