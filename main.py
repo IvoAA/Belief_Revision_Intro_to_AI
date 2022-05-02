@@ -88,8 +88,9 @@ def init():
             action = input()
             while action not in ['y','n']:
                 print('please choose y/n')
+                action = input()
             if action == 'y':
-                print('please input your board as a stirng of the form (r_1 & o_2 & y_3 & g_4)')
+                print('please input your board as a string of the form (r_1 & o_2 & y_3 & g_4)')
                 print('possible colors are [r,o,y,g,b,i] \n')
                 action = input()
                 mastermind = Mastermind_AI(action)
