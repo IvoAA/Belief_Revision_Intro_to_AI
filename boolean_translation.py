@@ -55,7 +55,7 @@ def boolean_translation(guess,n_correct,n_color):
                 possibilities_colors.append('(' + " | ".join([f"{color}_{pos}" for pos in possible_positions]) + ')')
 
             str_build.append(f"{pg} & {' & '.join(possibilities_colors)}")
-        return f"{other_colors_wrong} & (({') | ('.join(str_build)}))"
+        return f"{other_colors_wrong} & (({') | ('.join(list(set(str_build)))}))"
      
     #all guesses are either completely correct or the color is completely wrong - return each combination of color being correct, and each other color being wrong           
     if n_color == 0:
@@ -83,7 +83,7 @@ def boolean_translation(guess,n_correct,n_color):
 
             str_build.append(f"{pg} & {' & '.join(impossible_color_positions)}")
 
-        return f"({') | ('.join(str_build)})"
+        return f"(({') | ('.join(list(set(str_build)))}))"
      
     #there are no correct guesses, only some colors may be correct, and the rest are wrong    
 
@@ -130,7 +130,7 @@ def boolean_translation(guess,n_correct,n_color):
         guesses_deemed_wrong_o = [x for x in guess if x not in possible_correct_combination]
 
         possible_colors_correct = list(itertools.combinations(guesses_deemed_wrong_o, n_color))
-        
+
         inner_str_build = []
         for possible_color_correct_combination in possible_colors_correct:
             colors_chosen = [x[0] for x in possible_color_correct_combination]
@@ -138,15 +138,15 @@ def boolean_translation(guess,n_correct,n_color):
             guesses_deemed_wrong = [x for x in guess if x not in possible_color_correct_combination and x[0] not in colors_chosen]
             colors_guesses_wrong = list(set([x[0] for x in guesses_deemed_wrong]))
             positions_of_incorrect_guesses = [x[-1] for x in all_positions if x not in fixed_positions]
-            
+
             po = phi_o(positions_of_colors, colors_chosen, positions_of_incorrect_guesses)
             pr = phi_r(positions_of_incorrect_guesses, colors_guesses_wrong)
 
             append_string = '('+ po + ' & ' + pr + ')'
             inner_str_build.append(append_string)
-        
+
         por = "(" + (' | ').join(inner_str_build) +")"
-    
+
         str_build.append('('+ pg + ' & ' +  por + ')')
 
     return f"({') | ('.join(str_build)})"
