@@ -50,13 +50,14 @@ def get_unit_clauses(kb: List) -> List:
 
 def simplify(kb: List, unit: str) -> Union[List, bool]:  # TODO: Why return bool here?
     neg_unit = str(to_cnf(f"~({unit})"))
-    space_unit = f" {unit}"
+    space_unit_right = f" {unit}"
+    space_unit_left = f"{unit} "
 
     new_kb = []
     for clause in kb:
         # if we look for the unit 'p' in the sentence 'r | ~p' it is found
         # therefore we will look for the string ' p', to ensure it has no negation
-        if clause == unit or space_unit in clause:
+        if clause == unit or space_unit_left in clause or space_unit_right in clause:
             continue
 
         if neg_unit in clause:

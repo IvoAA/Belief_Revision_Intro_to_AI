@@ -103,7 +103,7 @@ class BeliefBase:
         truths = []
         units = get_units_from_clauses(self.knowledge_base)
         for unit in units:
-            if self.check_entailment(unit):
+            if unit not in truths and self.check_entailment(unit):
                 truths.append(unit)
         return truths
 
