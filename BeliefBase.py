@@ -9,7 +9,7 @@ from utils import DPLL, sentence_to_clauses,get_units_from_clauses, get_units_fr
 
 class BeliefBase:
     def __init__(self):
-        self.__knowledge_base: List[Clause] = []
+        self.knowledge_base: List[Clause] = []
         self.nr_clause = 0
 
     def tell(self, sentence: str):
@@ -20,8 +20,8 @@ class BeliefBase:
             self.expansion(clause)
 
     def expansion(self, clause: str):
-        if clause not in self.strip_kb(self.__knowledge_base):
-            self.__knowledge_base.append(Clause(clause, self.clause_priority()))
+        if clause not in self.strip_kb(self.knowledge_base):
+            self.knowledge_base.append(Clause(clause, self.clause_priority()))
 
     def clause_priority(self):
         priority = self.nr_clause
@@ -37,7 +37,7 @@ class BeliefBase:
         all_combinations = combinations(kb, nr_clauses)
         contradicting_comb = []
         for combination in all_combinations:
-            kb_stub = copy.deepcopy(self.__knowledge_base)
+            kb_stub = copy.deepcopy(self.knowledge_base)
             for cl in combination:
                 kb_stub.remove(cl)
             if not self.check_entailment(clause, kb_stub):
@@ -55,23 +55,24 @@ class BeliefBase:
     def _clause_contraction(self, c: str):
         contradicting_comb = None
         if self.check_entailment(c):
-            for index in range(len(self.__knowledge_base)):
-                contradicting_comb = self._contradiction_by_clauses(self.__knowledge_base, index + 1, c)
+            for index in range(len(self.knowledge_base)):
+                contradicting_comb = self._contradiction_by_clauses(self.knowledge_base, index + 1, c)
                 if len(contradicting_comb) > 0:
                     break
             if contradicting_comb is None:
                 raise "contradiction found in contraction, but no clause found which creates the contradiction"
             remove_clauses = self._combination_lowest_priority(contradicting_comb)
             for clause in remove_clauses:
-                self.__knowledge_base.remove(clause)
+                self.knowledge_base.remove(clause)
 
-        if c in self.__knowledge_base:
-            self.__knowledge_base.remove(c)
+        if c in self.knowledge_base:
+            self.knowledge_base.remove(c)
 
     def contraction(self, sentence: str):
         clauses = sentence_to_clauses(sentence)
         for clause in clauses:
-            self._clause_contraction(clause)
+            if clause != 'True':  # ensure we're not contracting a Tautology
+                self._clause_contraction(clause)
 
     def check_entailment(self, sentence: str, kb: List[Clause] = None) -> bool:
         # negate sentence
@@ -84,7 +85,7 @@ class BeliefBase:
         return not DPLL(new_kb)
 
     def get_knowledge_base(self):
-        return self.strip_kb(self.__knowledge_base)
+        return self.strip_kb(self.knowledge_base)
 
     @staticmethod
     def strip_kb(kb: List[Clause]) -> List[str]:
@@ -94,13 +95,13 @@ class BeliefBase:
 
 
     def obtain_units(self):
-        units = get_units_from_clauses_mastermind(self.__knowledge_base)
+        units = get_units_from_clauses_mastermind(self.knowledge_base)
         return units
 
 
     def obtain_truth(self):
         truths = []
-        units = get_units_from_clauses(self.__knowledge_base)
+        units = get_units_from_clauses(self.knowledge_base)
         for unit in units:
             if self.check_entailment(unit):
                 truths.append(unit)
