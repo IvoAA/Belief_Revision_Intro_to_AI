@@ -1,5 +1,3 @@
-from doctest import master
-from re import I
 from BeliefBase import BeliefBase
 import boolean_translation
 import itertools
@@ -154,7 +152,7 @@ class Mastermind_AI:
         self.guessed = []
         self.n_rounds = 10 #hardcoded maximum 10 rounds
         self.boolean_translation_guess = ''
-        self.best_first_guess_flag = False
+        self.best_first_guess_flag = True
         self.all_guesses = self.create_all_possible_guesses()
         self.truths = []
         self.falsities = []
@@ -176,7 +174,7 @@ class Mastermind_AI:
         print(self.boolean_translation_guess)
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        self.belief_base.tell(self.boolean_translation_guess)
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
@@ -200,7 +198,7 @@ class Mastermind_AI:
         print(self.boolean_translation_guess)
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        self.belief_base.tell(self.boolean_translation_guess)
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
@@ -209,7 +207,7 @@ class Mastermind_AI:
         self.falsities = list(map(lambda y: y[1:], self.falsities))
 
     def manual_guess(self):
-        guess = "g_1 & r_2 & y_3 & b_4"
+        guess = "b_1 & b_2 & g_3 & b_4"
         guess_l = guess.split(' & ')
         print('The guessed value is: '+ guess)
         self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
@@ -223,7 +221,7 @@ class Mastermind_AI:
         print(self.boolean_translation_guess)
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        self.belief_base.tell(self.boolean_translation_guess)
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
@@ -240,34 +238,32 @@ class Mastermind_AI:
         positions['3'] = [x+'_3' for x in self.colors]
         positions['4'] = [x+'_4' for x in self.colors]
 
-        possible_guesses = {}
-        possible_guesses['1'] = []
-        possible_guesses['2'] = []
-        possible_guesses['3'] = []
-        possible_guesses['4'] = []
+        truth = {}
+        truth['1'] = [x for x in self.truths if x[-1] == '1']
+        truth['2'] = [x for x in self.truths if x[-1] == '2']
+        truth['3'] = [x for x in self.truths if x[-1] == '3']
+        truth['4'] = [x for x in self.truths if x[-1] == '4']
 
-        for truth in self.truths:
-            possible_guesses[truth[-1]].append(truth)
+        falsity = {}
+        falsity['1'] = [x for x in self.falsities if x[-1] == '1']
+        falsity['2'] = [x for x in self.falsities if x[-1] == '2']
+        falsity['3'] = [x for x in self.falsities if x[-1] == '3']
+        falsity['4'] = [x for x in self.falsities if x[-1] == '1']
 
         print('making an informed guess')
-        
-        correct_positions = [x[-1] for x in self.truths]
-        incorrect_positions = [x for x in ['1','2','3','4'] if x not in correct_positions]
-
-        
-        for x in incorrect_positions:
-            all_guesses = positions[x]
-            possible_guesses[x].extend([y for y in all_guesses if y not in self.falsities])
 
         guess = self.guess
 
         while guess in self.guessed:
             guess_l = []
             for position in ['1','2','3','4']:
-                if len(possible_guesses[position])>0:
-                    guess_l.append(random.choice(possible_guesses[position]))
+                #there is a truth at that position, so append it
+                if len (truth[position])>0:
+                    guess_l.append(truth[position][0])
+                #there is not a truth at that position, so append the first random choice that is not in falsity
                 else:
-                    guess_l.append('this shouldn\'t happen')
+                    possible_guesses = [x for x in positions[position] if x not in falsity[position]]
+                    guess_l.append(random.choice(possible_guesses))
 
             guess = (' & ').join(guess_l)
 
@@ -284,7 +280,7 @@ class Mastermind_AI:
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
 
-        self.belief_base.tell("("+self.boolean_translation_guess+")")
+        self.belief_base.tell(self.boolean_translation_guess)
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
@@ -331,8 +327,8 @@ class Mastermind_AI:
         print('The board is: '+ str(self.mastermind) + ' But the computer doesn\'t know this')
 
         if self.best_first_guess_flag:
-            self.best_first_guess()
-            #self.manual_guess()
+            #self.best_first_guess()
+            self.manual_guess()
         else:
             self.random_first_guess()
 
