@@ -6,4 +6,4 @@
 
 - file `w9e1.txt` has some clauses that were used in exercise 1 of Week 9
     - should be possible to deduce `p & r & s` from that
-    - can be added to Knowledge Base with action `B`
+    - can be added to Knowledge Base with action `B` and then the name of the file (w9e1)
