@@ -38,7 +38,7 @@ class Mastermind:
         return mastermind_board
 
     #takes in a list of all possible colors in a single column and produces a string
-    # in the form (¬t1 ∨ ¬s1) ∧ (¬s1 ∨ ¬d1) ∧ (¬d1 ∨ ¬t1) 
+    # in the form (o1 >> ~y1 & ~g1 & ~b1 & ~i1)
     # to denote only one color allowed per column
     def only_one_color(self,position):
         #create or clauses
@@ -49,8 +49,9 @@ class Mastermind:
             colors.remove(color)
             all_together = [col+'_'+position for col in colors]
             all_together = list(map(lambda y: '~'+y, all_together))
-            or_string = "("+ (' | ').join(all_together) +")"
-            or_clauses.append(or_string)
+            or_string = "("+ (' & ').join(all_together) +")"
+
+            or_clauses.append(f"{color}_{position} >> {or_string}")
             #negate all predicates
     
         return ' & '.join(or_clauses)
@@ -65,25 +66,24 @@ class Mastermind:
 
         positions = ['1','2','3','4']
 
-        
         for position in positions:
             #there must be one color in each position
             all_colors_in_position = [color+'_'+position for color in self.colors]
             sentence = (' | ').join(all_colors_in_position)
             sentence = "("+sentence+")"
-            #print(sentence)
+
             game_rule_belief_base.tell(sentence)
-            #print(game_rule_belief_base.obtain_units())
-            #print('\n')
 
             #there can only be one color in each position
             sentence = self.only_one_color(position)
-            #print(sentence)
-            game_rule_belief_base.tell(sentence)
-            #print(game_rule_belief_base.obtain_units())
-            #print('\n')
 
-        #print(game_rule_belief_base.get_knowledge_base())
+            game_rule_belief_base.tell(sentence)
+
+
+        # add shortcuts to negate colors (e.g. ~r means red is not in any of the 4 positions)
+        for color in self.colors:
+            game_rule_belief_base.tell(f"~{color} >> (~{color}_1 & ~{color}_2 & ~{color}_3 & ~{color}_4)")
+
         return game_rule_belief_base
     
 
@@ -207,7 +207,7 @@ class Mastermind_AI:
         self.falsities = list(map(lambda y: y[1:], self.falsities))
 
     def manual_guess(self):
-        guess = "b_1 & b_2 & g_3 & b_4"
+        guess = "b_1 & g_2 & i_3 & o_4"
         guess_l = guess.split(' & ')
         print('The guessed value is: '+ guess)
         self.correct_color_and_position,self.correct_color_wrong_position, self.wrong_color_wrong_position, self.game_over = self.mastermind.check_guess(guess)
@@ -245,10 +245,10 @@ class Mastermind_AI:
         truth['4'] = [x for x in self.truths if x[-1] == '4']
 
         falsity = {}
-        falsity['1'] = [x for x in self.falsities if x[-1] == '1']
-        falsity['2'] = [x for x in self.falsities if x[-1] == '2']
-        falsity['3'] = [x for x in self.falsities if x[-1] == '3']
-        falsity['4'] = [x for x in self.falsities if x[-1] == '1']
+        falsity['1'] = [x for x in self.falsities if len(x) == 1 or x[-1] == '1']
+        falsity['2'] = [x for x in self.falsities if len(x) == 1 or x[-1] == '2']
+        falsity['3'] = [x for x in self.falsities if len(x) == 1 or x[-1] == '3']
+        falsity['4'] = [x for x in self.falsities if len(x) == 1 or x[-1] == '1']
 
         print('making an informed guess')
 
@@ -274,7 +274,7 @@ class Mastermind_AI:
         print('totally wrong: '+ str(self.wrong_color_wrong_position))
         self.guess = guess
         self.guessed.append(guess)
-        self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l,self.correct_color_and_position, self.correct_color_wrong_position)
+        self.boolean_translation_guess = boolean_translation.boolean_translation(guess_l, self.correct_color_and_position, self.correct_color_wrong_position)
         print('boolean translation: ')
         print(self.boolean_translation_guess)
         print("unit clauses before telling:")

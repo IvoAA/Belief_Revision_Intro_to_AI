@@ -86,19 +86,16 @@ def get_units_from_clauses(kb: List[Clause]):
 
 
 def sentence_to_clauses(sentence: str) -> List[str]:
-    small_sentences = split_sentence_by_first_OR(sentence)
-    clauses = ''
-    for unit_sentence in small_sentences:
-        try:
-            cnf = to_cnf(unit_sentence)
-            clauses = str(cnf).split('&')
+    try:
+        cnf = to_cnf(sentence, force=True)
+        clauses = str(cnf).split('&')
 
-        except SyntaxError:
-            raise Exception('Formula provided has wrong format.')
+    except SyntaxError:
+        raise Exception('Formula provided has wrong format.')
 
-        for i, clause in enumerate(clauses):
-            clauses[i] = clause.replace('(', '').replace(')', '').strip()
-        # TODO: Replace with map function
+    for i, clause in enumerate(clauses):
+        clauses[i] = clause.replace('(', '').replace(')', '').strip()
+    # TODO: Replace with map function
     return clauses
 
 
