@@ -258,18 +258,22 @@ class Mastermind_AI:
             guess_a = []
             missing_positions = ['1', '2', '3', '4']
 
-            for t in truth:
-                guess_a.append(t)
-                missing_positions.remove(t[-1])
+            for p in truth:
+                for t in truth[p]:
+                    guess_a.append(t)
+                    missing_positions.remove(t[-1])
 
             while missing_positions:
                 pos = missing_positions[0]
 
                 possible_guesses = [x for x in positions[pos] if x not in falsity[pos]]
-                x = random.choice(possible_guesses)
+                new_guess = random.choice(possible_guesses)
 
-                new_guess = f"{x}_{pos}"
-                if self.belief_base.check_entailment(' & '.join(guess_a) + ' & ' + new_guess):
+                new_sentence = [new_guess]
+                if guess_a:
+                    new_sentence.append(' & '.join(guess_a))
+
+                if self.belief_base.check_entailment(' & '.join(new_sentence)):
                     guess_a.append(new_guess)
                     missing_positions.remove(pos)
 
