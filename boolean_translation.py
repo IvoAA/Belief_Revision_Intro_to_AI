@@ -15,17 +15,29 @@ def boolean_translation(guess,n_correct,n_color):
     
     #all answers are wrong, state that the correct answer as neither of the guessed colors
     if n_wrong == 4:
-        return '(~' + '  & ~'.join(colors_in_guess) + ')'
+        str_builder = []
+        for color in colors_in_guess:
+            for position in range(1, 5):
+                str_builder.append(f"{color}_{position}")
+
+        return ' & '.join(str_builder)
 
     #all colors are correct return phi_o of each color and all other colors being wrong
     if n_color == 4:
         guess_is_wrong = '~' + '  & ~'.join(guess)
-        other_colors_wrong = '~' + '  & ~'.join(other_colors)
-        return f"{guess_is_wrong} & {other_colors_wrong}"
+        other_colors_wrong = []
+        for color in other_colors:
+            for position in range(1, 5):
+                other_colors_wrong.append(f"{color}_{position}")
+        return f"{guess_is_wrong} & {' & '.join(other_colors_wrong)}"
     
     #there are no wrong colors return all possible combinations of correct and other colors, all other colors are wrong
     if n_wrong == 0:
-        other_colors_wrong = '~' + '  & ~'.join(other_colors)
+        other_colors_wrong_a = []
+        for color in other_colors:
+            for position in range(1, 5):
+                other_colors_wrong_a.append(f"{color}_{position}")
+        other_colors_wrong = ' & '.join(other_colors_wrong_a)
 
         possible_combinations_correct = list(itertools.combinations(guess, n_correct))
         str_build = []
@@ -112,7 +124,11 @@ def boolean_translation(guess,n_correct,n_color):
             if len(possibilities_colors) == n_color:
                 inner_str = []
                 if colors_not_chosen:
-                    inner_str.append(f"~{' & ~'.join(colors_not_chosen)}")
+                    other_colors_wrong_a = []
+                    for color in colors_not_chosen:
+                        for position in range(1, 5):
+                            other_colors_wrong_a.append(f"{color}_{position}")
+                    inner_str.append(' & '.join(other_colors_wrong_a))
                 inner_str.append(' & '.join(wrong_positions))
                 inner_str.append(' & '.join(possibilities_colors))
                 str_build.append(' & '.join(inner_str))

@@ -2,7 +2,7 @@ from BeliefBase import BeliefBase
 import boolean_translation
 import itertools
 import random
-from utils import get_units_from_clauses
+from utils import get_units_from_clauses, DPLL
 
 
 # implementing game logic for 4 pegs, 6 colors, 10 turns (if applicable) mastermind
@@ -80,8 +80,8 @@ class Mastermind:
             game_rule_belief_base.tell(sentence)
 
         # add shortcuts to negate colors (e.g. ~r means red is not in any of the 4 positions)
-        for color in self.colors:
-            game_rule_belief_base.tell(f"~{color} >> (~{color}_1 & ~{color}_2 & ~{color}_3 & ~{color}_4)")
+        # for color in self.colors:
+        #     game_rule_belief_base.tell(f"~{color} >> (~{color}_1 & ~{color}_2 & ~{color}_3 & ~{color}_4)")
 
         return game_rule_belief_base
 
@@ -173,7 +173,7 @@ class Mastermind_AI:
         print(self.boolean_translation_guess)
         print("unit clauses before telling:")
         print(self.belief_base.obtain_units())
-        self.belief_base.revision(self.boolean_translation_guess)
+        self.belief_base.tell(self.boolean_translation_guess)
         print("unit clauses after telling:")
         print(self.belief_base.obtain_units())
         unit_clauses = self.belief_base.obtain_units()
@@ -271,9 +271,9 @@ class Mastermind_AI:
 
                 new_sentence = [new_guess]
                 if guess_a:
-                    new_sentence.append(' & '.join(guess_a))
+                    new_sentence += guess_a
 
-                if self.belief_base.check_entailment(' & '.join(new_sentence)):
+                if DPLL(self.belief_base.get_knowledge_base() + new_sentence):
                     guess_a.append(new_guess)
                     missing_positions.remove(pos)
 
@@ -308,7 +308,7 @@ class Mastermind_AI:
 
     def brute_force_guess(self):
         print('brute forcing guess')
-        self.belief_base.revision(self.boolean_translation_guess)
+        self.belief_base.tell(self.boolean_translation_guess)
         for guess in self.all_guesses:
             if guess not in self.guessed:
                 if self.belief_base.check_entailment(guess):
